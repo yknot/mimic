@@ -61,4 +61,4 @@ if __name__ == '__main__':
     hadm_id = get_stays()
     item_id = get_variable_codes()
 
-    subset_chartevents()
+    subset_chartevents(item_id, hadm_id)

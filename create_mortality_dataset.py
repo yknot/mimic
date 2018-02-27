@@ -48,10 +48,10 @@ def subset_chartevents(item_id, hadm_id):
         writer = csv.writer(o, delimiter=",")
         for row in reader:
             # check item_id
-            if row[4] not in item_id:
+            if int(row[4]) not in item_id:
                 continue
             # check hadm_id
-            if row[2] not in hadm_id:
+            if int(row[2]) not in hadm_id:
                 continue
 
             writer.writerow(row)

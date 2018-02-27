@@ -1,5 +1,7 @@
-import pandas as pd
 import json
+import csv
+from contextlib import ExitStack
+import pandas as pd
 
 
 def get_stays():
@@ -24,19 +26,39 @@ def get_stays():
         merged_a_first.DISCHTIME) -
         pd.to_datetime(merged_a_first.ADMITTIME)).dt.days > 2]
 
-    return merged_a_f_long
+    return merged_a_f_long.HADM_ID.values
 
 
 def get_variable_codes():
     """get the codes for the variables we are looking at"""
     items = pd.read_csv('data/D_ITEMS.csv')
     measurements = json.load(open('measurements.json'))
-    measurements_list = [i for i_s in measurements for i in i_s]
-    items_subset = items[items.LABEL.isin(measurements_list)]
+    measurements_list = [i for i_s in measurements.values() for i in i_s]
+    items_subset = items[items.ITEMID.isin(measurements_list)]
 
-    return items_subset
+    return items_subset.ITEMID.values
+
+
+def subset_chartevents(item_id, hadm_id):
+    """go throught 30gb+ chart events file"""
+    with ExitStack() as stack:
+        f = stack.enter_context(open('data/CHARTEVENTS.csv'))
+        o = stack.enter_context(open('data/subset_CHARTEVENTS.csv', 'w'))
+        reader = csv.reader(f)
+        writer = csv.writer(o, delimiter=",")
+        for row in reader:
+            # check item_id
+            if row[4] not in item_id:
+                continue
+            # check hadm_id
+            if row[2] not in hadm_id:
+                continue
+
+            writer.writerow(row)
 
 
 if __name__ == '__main__':
-    patients = get_stays()
-    variables = get_variable_codes()
+    hadm_id = get_stays()
+    item_id = get_variable_codes()
+
+    subset_chartevents()

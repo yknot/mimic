@@ -46,7 +46,14 @@ def subset_chartevents(item_id, hadm_id):
         o = stack.enter_context(open('data/subset_CHARTEVENTS.csv', 'w'))
         reader = csv.reader(f)
         writer = csv.writer(o, delimiter=",")
+        i = 0
+        ten = 330712484 // 10
         for row in reader:
+            if i == 0:
+                continue
+            i += 1
+            if i % ten == 0:
+                print(f'{i//ten}% Done')
             # check item_id
             if int(row[4]) not in item_id:
                 continue

@@ -1,6 +1,7 @@
 import json
 import csv
 from contextlib import ExitStack
+import argparse
 import pandas as pd
 
 
@@ -26,7 +27,7 @@ def get_stays():
         merged_a_first.DISCHTIME) -
         pd.to_datetime(merged_a_first.ADMITTIME)).dt.days > 2]
 
-    return merged_a_f_long.HADM_ID.values
+    return merged_a_f_long
 
 
 def get_variable_codes():
@@ -36,7 +37,7 @@ def get_variable_codes():
     measurements_list = [i for i_s in measurements.values() for i in i_s]
     items_subset = items[items.ITEMID.isin(measurements_list)]
 
-    return items_subset.ITEMID.values
+    return items_subset
 
 
 def subset_chartevents(item_id, hadm_id):
@@ -50,6 +51,7 @@ def subset_chartevents(item_id, hadm_id):
         ten = 330712484 // 10
         for row in reader:
             if i == 0:
+                writer.writerow(row)
                 i += 1
                 continue
             i += 1
@@ -65,8 +67,49 @@ def subset_chartevents(item_id, hadm_id):
             writer.writerow(row)
 
 
-if __name__ == '__main__':
-    hadm_id = get_stays()
-    item_id = get_variable_codes()
+def trim_subset(admissions, patients):
+    """open the subset created and trim it"""
+    with ExitStack() as stack:
+        f = stack.enter_context(open('data/subset_CHARTEVENTS.csv'))
+        o = stack.enter_context(open('data/subset_trim_CHARTEVENTS.csv', 'w'))
+        reader = csv.reader(f)
+        writer = csv.writer(o, delimiter=",")
 
-    subset_chartevents(item_id, hadm_id)
+        headers = next(reader, None)  # skip the headers
+        writer.writerow(headers)
+
+        for row in reader:
+            admit_time = admissions.ADMITTIME[admissions.HADM_ID == int(
+                row[2])]
+            diff = pd.to_datetime(row[5]) - \
+                pd.to_datetime(admit_time).values[0]
+            if diff.days <= 2:
+                writer.writerow(row)
+
+
+def parse_args(parser):
+    """parse command line arguments"""
+    parser.add_argument('--subset', action='store_true',
+                        help="Create subset of CHARTEVENTS")
+    parser.add_argument('--trim', action='store_true',
+                        help="Trim subset of CHARTEVENTS")
+
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    args = parse_args(argparse.ArgumentParser())
+
+    if args.subset:
+        hadm_id = get_stays().HADM_ID.values
+        item_id = get_variable_codes().ITEMID.values
+
+        subset_chartevents(item_id, hadm_id)
+    if args.trim:
+        admissions = get_stays()
+        items = get_variable_codes()
+
+        trim_subset(admissions, items)
+
+    if not (args.subset or args.trim):
+        print('No option selected')

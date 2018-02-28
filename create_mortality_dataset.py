@@ -53,7 +53,7 @@ def subset_chartevents(item_id, hadm_id):
                 continue
             i += 1
             if i % ten == 0:
-                print(f'{i//ten}% Done')
+                print(f'{i * 10//ten}% Done')
             # check item_id
             if int(row[4]) not in item_id:
                 continue

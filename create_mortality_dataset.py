@@ -50,6 +50,7 @@ def subset_chartevents(item_id, hadm_id):
         ten = 330712484 // 10
         for row in reader:
             if i == 0:
+                i += 1
                 continue
             i += 1
             if i % ten == 0:

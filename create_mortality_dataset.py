@@ -125,11 +125,7 @@ def get_site(df):
                                                              'INTIME'])
 
     # one hot encoding of care unit
-    icustays['CCU'] = (icustays.FIRST_CAREUNIT == 'CCU').astype('int')
-    icustays['CSRU'] = (icustays.FIRST_CAREUNIT == 'CSRU').astype('int')
-    icustays['MICU'] = (icustays.FIRST_CAREUNIT == 'MICU').astype('int')
-    icustays['SICU'] = (icustays.FIRST_CAREUNIT == 'SICU').astype('int')
-    icustays['TSICU'] = (icustays.FIRST_CAREUNIT == 'TSICU').astype('int')
+    icustays['ICU'] = icustays.FIRST_CAREUNIT
 
     # drop columns
     icustays = icustays.drop(['ROW_ID', 'ICUSTAY_ID', 'DBSOURCE',

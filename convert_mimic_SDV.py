@@ -48,5 +48,8 @@ for c in df.columns:
         new_col, decode = categorical(df[c])
         df[c] = new_col
         decoders[c] = decode
-    elif df[c].dtype.char == '':
+    elif df[c].dtype.char == 'd':
         df[c] = numeric(df[c])
+
+
+df.to_csv('data/final_df_sdv.csv', index=False)

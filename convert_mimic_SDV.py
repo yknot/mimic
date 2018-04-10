@@ -26,11 +26,9 @@ def categorical(col):
 
 def numeric(col):
     """normalize a numeric column"""
-    return ((col - min(col)) / (max(col) - min(col)))
+    return ((col - min(col)) / (max(col) - min(col))), min(col), max(col)
 
 # create decoder function
-
-
 def decode(x, limits):
     for k, v in limits.items():
         if x < k:
@@ -42,19 +40,22 @@ df = pd.read_csv('data/final_df.csv')
 df = df.dropna()
 df = df.drop(['ADMITTIME', 'DISCHTIME'], axis=1)
 
+
 # test
 new_col, lim = categorical(df.ICU)
 assert ((new_col.apply(lambda x: decode(x, lim)) == df.ICU).all())
 
 limits = {}
+min_max = {}
 for c in df.columns:
     if df[c].dtype.char == 'O' or df[c].dtype.char == 'l':
-        new_col, lim = categorical(df[c])
-        df[c] = new_col
+        df[c], lim = categorical(df[c])
         limits[c] = lim
     elif df[c].dtype.char == 'd':
-        df[c] = numeric(df[c])
+        df[c], min_res, max_res = numeric(df[c])
+        min_max[c] = (min_res, max_res)
 
 # save data and decoders
 df.to_csv('data/final_df_sdv.csv', index=False)
-pickle.dump(limits, open('data/decoders', 'wb'))
+pickle.dump(limits, open('data/decoders_limits', 'wb'))
+pickle.dump(min_max, open('data/decoders_min_max', 'wb'))

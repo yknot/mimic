@@ -23,10 +23,10 @@ def undo_numeric(col, min_col, max_col):
 
 limits = pickle.load(open('data/decoders_limits', 'rb'))
 min_max = pickle.load(open('data/decoders_min_max', 'rb'))
+test_data = pd.read_csv('data/final_df_sdv.csv')
 
 
 if TEST:
-    test_data = pd.read_csv('data/final_df_sdv.csv')
     df = pd.read_csv('data/final_df.csv')
     df = df.dropna()
     df = df.reset_index()
@@ -43,4 +43,14 @@ if TEST:
 
 else:
     # real decode
-    data = np.load('data/gen_df_sdv.npy')
+    gen_data = pd.DataFrame(np.load('data/gen_df_sdv.npy'),
+                            columns=test_data.columns)
+
+    for c in gen_data.columns:
+        if c in limits:
+            gen_data[c] = undo_categorical(gen_data[c], limits[c])
+        else:
+            gen_data[c] = undo_numeric(gen_data[c], *min_max[c])
+
+    # save result
+    gen_data.to_csv('data/gen_df.csv', index=False)

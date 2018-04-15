@@ -1,3 +1,4 @@
+import sys
 import pickle
 import pandas as pd
 from scipy.stats import truncnorm
@@ -28,6 +29,7 @@ def numeric(col):
     """normalize a numeric column"""
     return ((col - min(col)) / (max(col) - min(col))), min(col), max(col)
 
+
 # create decoder function
 def decode(x, limits):
     for k, v in limits.items():
@@ -36,15 +38,10 @@ def decode(x, limits):
 
 
 # read in data with column names
-df = pd.read_csv('data/final_df.csv')
+df = pd.read_csv(sys.argv[1])
 df = df.dropna()
-df = df.drop(['ADMITTIME', 'DISCHTIME'], axis=1)
 
-
-# test
-new_col, lim = categorical(df.ICU)
-assert ((new_col.apply(lambda x: decode(x, lim)) == df.ICU).all())
-
+# loop through every column
 limits = {}
 min_max = {}
 for c in df.columns:
@@ -56,6 +53,6 @@ for c in df.columns:
         min_max[c] = (min_res, max_res)
 
 # save data and decoders
-df.to_csv('data/final_df_sdv.csv', index=False)
+df.to_csv(sys.argv[:-4] + 'sdv.csv', index=False)
 pickle.dump(limits, open('data/decoders_limits', 'wb'))
 pickle.dump(min_max, open('data/decoders_min_max', 'wb'))

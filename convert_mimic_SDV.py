@@ -37,6 +37,10 @@ def decode(x, limits):
             return v
 
 
+if len(sys.argv) != 2:
+    print('Usage: python3 convert_mimic_SDV.py <data>')
+    sys.exit(0)
+
 # read in data with column names
 df = pd.read_csv(sys.argv[1])
 df = df.dropna()

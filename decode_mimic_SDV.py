@@ -20,6 +20,12 @@ def undo_numeric(col, min_col, max_col):
     return ((max_col - min_col) * col) + min_col
 
 
+if len(sys.argv) != 3:
+    print('Usage: python3 decode_mimic_SDV.py <generated_data> ' +
+          '<origional_data>')
+    sys.exit(0)
+
+
 limits = pickle.load(open('data/decoders_limits', 'rb'))
 min_max = pickle.load(open('data/decoders_min_max', 'rb'))
 test_data = pd.read_csv(sys.argv[2])
